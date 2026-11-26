@@ -3,53 +3,362 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>12/9 期末報告</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>今天去哪？— 天氣心情決策器</title>
+  <style>
+    :root {
+      --paper: #f5f0e7;
+      --ink: #20201d;
+      --orange: #f15b36;
+      --blue: #a9dce1;
+      --line: #20201d;
+      --muted: #716f67;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Noto Sans TC", "PingFang TC", sans-serif;
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .wrap { max-width: 1180px; margin: auto; padding: 24px; }
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 2px solid var(--ink); padding-bottom: 14px;
+      font-size: 13px; font-weight: 800; letter-spacing: .08em;
+    }
+    .brand { display: flex; gap: 9px; align-items: center; }
+    .brand-mark {
+      display: grid; place-items: center; width: 30px; height: 30px;
+      background: var(--orange); border-radius: 50%; color: white;
+      font-size: 19px; transform: rotate(-12deg);
+    }
+    .top-note { color: var(--muted); }
+    .hero {
+      display: grid; grid-template-columns: 1.15fr .85fr; gap: 30px;
+      padding: 50px 0 34px; align-items: end;
+    }
+    .eyebrow { color: var(--orange); font-weight: 900; letter-spacing: .12em; }
+    h1 {
+      font-size: clamp(52px, 9vw, 106px); line-height: .96;
+      letter-spacing: -.08em; margin: 14px 0 18px;
+    }
+    h1 span { color: var(--orange); }
+    .intro { max-width: 460px; line-height: 1.8; margin: 0; }
+    .hero-sticker {
+      justify-self: end; width: min(100%, 300px); aspect-ratio: 1;
+      border: 2px solid var(--ink); border-radius: 50%; overflow: hidden;
+      position: relative; transform: rotate(7deg); background: var(--blue);
+    }
+    .hero-sticker img { width: 100%; height: 100%; object-fit: cover; }
+    .sticker-text {
+      position: absolute; left: 10px; bottom: 12px; background: var(--orange);
+      color: white; padding: 9px 14px; font-weight: 900; transform: rotate(-8deg);
+    }
+    .panel {
+      border: 2px solid var(--ink); padding: 23px;
+      display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 22px;
+      align-items: end; background: #fffaf1;
+    }
+    .field-label {
+      display: block; font-size: 12px; font-weight: 900;
+      letter-spacing: .08em; margin-bottom: 12px;
+    }
+    .weather-options, .moods { display: flex; flex-wrap: wrap; gap: 7px; }
+    .pill {
+      border: 1.5px solid var(--ink); background: transparent;
+      padding: 8px 11px; border-radius: 99px; font-size: 13px;
+    }
+    .pill.active { color: white; background: var(--ink); }
+    .budget-row { display: flex; justify-content: space-between; font-size: 13px; }
+    input[type="range"] { width: 100%; accent-color: var(--orange); }
+    .go {
+      border: 0; background: var(--orange); color: white; padding: 15px 20px;
+      font-weight: 900; min-width: 142px; box-shadow: 4px 4px 0 var(--ink);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .go:hover { transform: translate(2px,2px); box-shadow: 2px 2px 0 var(--ink); }
+    .results-head {
+      display: flex; justify-content: space-between; align-items: end;
+      margin: 48px 0 18px; border-bottom: 2px solid var(--ink); padding-bottom: 12px;
+    }
+    h2 { margin: 0; font-size: 30px; letter-spacing: -.04em; }
+    .results-head p { margin: 0; color: var(--muted); font-size: 13px; }
+    .result-grid { display: grid; grid-template-columns: 1.3fr .7fr; gap: 20px; }
+    .main-card, .side-card {
+      border: 2px solid var(--ink); background: #fffaf1; position: relative;
+    }
+    .main-image { height: 340px; position: relative; overflow: hidden; background: var(--blue); }
+    .main-image img, .side-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .number {
+      position: absolute; top: 14px; left: 14px; background: var(--orange);
+      color: white; font-weight: 900; padding: 8px 11px; transform: rotate(-4deg);
+    }
+    .main-copy { padding: 22px 24px 24px; }
+    .main-copy h3 { font-size: 38px; margin: 5px 0 8px; letter-spacing: -.06em; }
+    .meta { color: var(--muted); font-size: 13px; }
+    .triptych { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+    .mini {
+      border-top: 1px solid #c9c4b8; padding-top: 12px;
+      font-size: 14px; line-height: 1.6;
+    }
+    .mini b { display: block; color: var(--orange); font-size: 11px; letter-spacing: .08em; }
+    .side-card { padding: 14px; }
+    .side-image { height: 220px; overflow: hidden; border: 1px solid var(--ink); }
+    .side-card h3 { margin: 16px 0 6px; font-size: 22px; }
+    .side-card p { color: var(--muted); line-height: 1.7; font-size: 13px; }
+    .save {
+      border: 1.5px solid var(--ink); background: transparent; padding: 9px 13px;
+      font-weight: 800;
+    }
+    .save.saved { background: var(--blue); }
+    .saved-list {
+      margin-top: 20px; padding: 15px 0; border-top: 1px dashed #aaa397;
+      font-size: 13px; line-height: 1.8;
+    }
+    .foot {
+      display: flex; justify-content: space-between; margin: 48px 0 12px;
+      padding-top: 14px; border-top: 2px solid var(--ink);
+      color: var(--muted); font-size: 12px;
+    }
+    @media (max-width: 800px) {
+      .hero { grid-template-columns: 1fr; padding-top: 34px; }
+      .hero-sticker { justify-self: start; width: 190px; }
+      .panel { grid-template-columns: 1fr 1fr; }
+      .go { width: 100%; }
+      .result-grid { grid-template-columns: 1fr; }
+      .main-image { height: 260px; }
+    }
+    @media (max-width: 520px) {
+      .wrap { padding: 16px; }
+      .top-note { display: none; }
+      .panel { grid-template-columns: 1fr; }
+      .results-head { align-items: start; gap: 10px; flex-direction: column; }
+      .triptych { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
-  <main class="container">
-    <header class="hero">
-      <span class="badge">Final Report · 12/9</span>
-      <h1>12/9 期末報告</h1>
-      <p class="subtitle">團隊協作初版架構已就緒，歡迎組員一起編輯與擴充內容。</p>
+  <main class="wrap">
+    <header>
+      <div class="brand"><span class="brand-mark">?</span> 不要想了，出發吧</div>
+      <div class="top-note">A LITTLE HELP FOR YOUR BIG DECISIONS · 2026</div>
     </header>
 
-    <section class="card">
-      <h2>專案進度檢核</h2>
-      <ul id="checklist" class="checklist">
-        <li>
-          <label>
-            <input type="checkbox" checked />
-            <span>建立 GitHub Public Repository 與初版程式</span>
-          </label>
-        </li>
-        <li>
-          <label>
-            <input type="checkbox" />
-            <span>確認組員已接受邀請並完成 git clone</span>
-          </label>
-        </li>
-        <li>
-          <label>
-            <input type="checkbox" />
-            <span>完成期末報告內容與視覺設計</span>
-          </label>
-        </li>
-        <li>
-          <label>
-            <input type="checkbox" />
-            <span>12/9 報告最終預演與定稿</span>
-          </label>
-        </li>
-      </ul>
-      <p id="progress-text" class="progress-text"></p>
+    <section class="hero">
+      <div>
+        <div class="eyebrow">天氣 × 預算 × 今日心情</div>
+        <h1>今天<br />去哪<span>？</span></h1>
+        <p class="intro">把「不知道要幹嘛」交給我。選好天氣、預算和心情，抽一張今日行程卡——去哪裡、吃什麼、穿什麼，一次決定。</p>
+      </div>
+      <div class="hero-sticker">
+        <img src="https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=800&q=85" alt="色彩鮮明的城市建築">
+        <div class="sticker-text">NO MORE「隨便」</div>
+      </div>
     </section>
 
-    <footer class="footer">
-      <span>Repository: amanda11533127 / final-report-1209</span>
+    <section class="panel" aria-label="選擇條件">
+      <div>
+        <span class="field-label">01 / 今天天氣</span>
+        <div class="weather-options" id="weatherOptions">
+          <button class="pill active" data-weather="sunny">☀️ 晴天</button>
+          <button class="pill" data-weather="cloudy">☁️ 陰天</button>
+          <button class="pill" data-weather="rainy">🌧️ 下雨</button>
+          <button class="pill" data-weather="cool">🧥 涼爽</button>
+        </div>
+      </div>
+      <div>
+        <span class="field-label">02 / 今天的預算</span>
+        <div class="budget-row"><span>NT$ 100</span><strong id="budgetText">NT$ 800</strong></div>
+        <input id="budget" type="range" min="100" max="2000" step="100" value="800" aria-label="預算">
+      </div>
+      <div>
+        <span class="field-label">03 / 現在的心情</span>
+        <div class="moods" id="moods">
+          <button class="pill active" data-mood="chill">想放空</button>
+          <button class="pill" data-mood="adventure">想探險</button>
+          <button class="pill" data-mood="foodie">想吃好料</button>
+          <button class="pill" data-mood="social">想熱鬧</button>
+        </div>
+      </div>
+      <button class="go" id="draw">幫我決定！ ↗</button>
+    </section>
+
+    <section class="results-head">
+      <div><div class="eyebrow">YOUR RANDOM PLAN</div><h2>今日命定行程</h2></div>
+      <p id="matchText">依照你的條件配對中…</p>
+    </section>
+
+    <section class="result-grid" aria-live="polite">
+      <article class="main-card">
+        <div class="main-image">
+          <img id="placeImage" src="" alt="">
+          <div class="number">TODAY'S PICK ✦</div>
+        </div>
+        <div class="main-copy">
+          <div class="eyebrow" id="placeType">DESTINATION</div>
+          <h3 id="placeName"></h3>
+          <div class="meta" id="placeMeta"></div>
+          <div class="triptych">
+            <div class="mini"><b>吃什麼 / EAT</b><span id="food"></span></div>
+            <div class="mini"><b>穿什麼 / WEAR</b><span id="wear"></span></div>
+          </div>
+        </div>
+      </article>
+      <aside class="side-card">
+        <div class="side-image"><img id="detailImage" src="" alt=""></div>
+        <h3 id="reasonTitle">為什麼是它？</h3>
+        <p id="reason"></p>
+        <button class="save" id="save">♡ 收藏這個行程</button>
+        <div class="saved-list"><b>我的收藏</b><br><span id="savedList">還沒有收藏，遇到喜歡的行程就收下吧。</span></div>
+      </aside>
+    </section>
+
+    <footer class="foot">
+      <span>一個幫你停止猶豫的小工具</span>
+      <span>Prototype 01 · 天氣資料目前為手動選擇</span>
     </footer>
   </main>
 
-  <script src="app.js"></script>
+  <script>
+    const plans = [
+      {
+        name: "河岸散步＋咖啡補給", type: "城市放風",
+        weather: ["sunny", "cloudy", "cool"], moods: ["chill", "social"],
+        cost: 350, food: "找間河岸咖啡店，點一杯冰拿鐵和甜點。",
+        wear: "薄長袖＋舒服好走的鞋，傍晚記得帶件外套。",
+        image: "photo-1470770841072-f978cf4d019e",
+        detail: "步調舒服、花費好控制，很適合想換個空氣又不想排行程的日子。"
+      },
+      {
+        name: "巷弄市集尋寶", type: "吃吃逛逛",
+        weather: ["sunny", "cloudy"], moods: ["adventure", "foodie", "social"],
+        cost: 650, food: "從小吃攤開始：鹹食一份，再留胃給甜點。",
+        wear: "輕便上衣＋好走的鞋，帶購物袋和防曬用品。",
+        image: "photo-1488459716781-31db52582fe9",
+        detail: "邊走邊吃、每個轉角都可能有新發現，適合想要熱鬧感的你。"
+      },
+      {
+        name: "美術館慢速充電", type: "室內充電",
+        weather: ["rainy", "sunny", "cloudy", "cool"], moods: ["chill", "adventure"],
+        cost: 500, food: "看完展去附近吃一碗熱湯麵，暖胃又滿足。",
+        wear: "舒服的襯衫或薄外套，冷氣房可多帶一件。",
+        image: "photo-1577083552431-6e5fd01aa342",
+        detail: "不受天氣影響，還能吸收一點新靈感，適合想安靜探索的時候。"
+      },
+      {
+        name: "森林步道小探險", type: "自然出走",
+        weather: ["sunny", "cloudy", "cool"], moods: ["adventure", "chill"],
+        cost: 700, food: "帶瓶水和簡單飯糰，回程再吃一頓好的。",
+        wear: "排汗上衣、防滑鞋；依氣溫加一件薄外套。",
+        image: "photo-1448375240586-882707db888b",
+        detail: "用一段步道換換腦袋。天氣舒適時出發，記得留意路況和日落時間。"
+      },
+      {
+        name: "雨天咖啡店躲一下", type: "室內小確幸",
+        weather: ["rainy", "cool", "cloudy"], moods: ["chill", "foodie"],
+        cost: 450, food: "熱拿鐵配一塊蛋糕，今天的甜點不必分享。",
+        wear: "薄針織＋防水外套，鞋子選不怕濕的款式。",
+        image: "photo-1445116572660-236099ec97a0",
+        detail: "把雨聲當背景音，找個窗邊座位慢慢吃、慢慢休息。"
+      },
+      {
+        name: "夜市熱鬧巡禮", type: "夜間覓食",
+        weather: ["sunny", "cloudy", "cool"], moods: ["foodie", "social", "adventure"],
+        cost: 800, food: "先吃招牌鹹食，再抽一支烤串，最後用甜品收尾。",
+        wear: "透氣上衣和好走的鞋，晚上微涼就加件外套。",
+        image: "photo-1555939594-58d7cb561ad1",
+        detail: "選擇多、氣氛滿，最適合胃口和社交電量都在線的日子。"
+      },
+      {
+        name: "書店＋一人小旅行", type: "安靜探索",
+        weather: ["rainy", "sunny", "cloudy", "cool"], moods: ["chill", "adventure"],
+        cost: 300, food: "附近找一家小店吃套餐，留點預算買一本書。",
+        wear: "方便久坐的舒適穿搭，冷氣房記得帶薄外套。",
+        image: "photo-1507842217343-583bb7270b66",
+        detail: "一個人也能安排得很完整：選一本書，再探索附近沒走過的街區。"
+      }
+    ];
+
+    let weather = "sunny";
+    let mood = "chill";
+    let currentPlan = plans[0];
+    const budget = document.getElementById("budget");
+
+    document.getElementById("weatherOptions").addEventListener("click", e => {
+      const button = e.target.closest("button[data-weather]");
+      if (!button) return;
+      weather = button.dataset.weather;
+      document.querySelectorAll("#weatherOptions .pill").forEach(b => b.classList.toggle("active", b === button));
+    });
+
+    document.getElementById("moods").addEventListener("click", e => {
+      const button = e.target.closest("button[data-mood]");
+      if (!button) return;
+      mood = button.dataset.mood;
+      document.querySelectorAll("#moods .pill").forEach(b => b.classList.toggle("active", b === button));
+    });
+
+    budget.addEventListener("input", () => {
+      document.getElementById("budgetText").textContent = `NT$ ${Number(budget.value).toLocaleString()}`;
+    });
+
+    function photo(id, width = 1000) {
+      return `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${width}&q=85`;
+    }
+
+    function drawPlan() {
+      const limit = Number(budget.value);
+      let matches = plans
+        .map(plan => ({
+          plan,
+          score: (plan.weather.includes(weather) ? 2 : 0) +
+                 (plan.moods.includes(mood) ? 2 : 0) +
+                 (plan.cost <= limit ? 2 : 0)
+        }))
+        .filter(item => item.plan.cost <= limit)
+        .sort((a, b) => b.score - a.score);
+
+      if (!matches.length) matches = [{ plan: plans.find(p => p.cost <= limit) || plans[0], score: 1 }];
+      const bestScore = matches[0].score;
+      const top = matches.filter(item => item.score === bestScore);
+      currentPlan = top[Math.floor(Math.random() * top.length)].plan;
+
+      document.getElementById("placeImage").src = photo(currentPlan.image);
+      document.getElementById("placeImage").alt = currentPlan.name;
+      document.getElementById("detailImage").src = photo(currentPlan.image, 700);
+      document.getElementById("detailImage").alt = currentPlan.name;
+      document.getElementById("placeType").textContent = currentPlan.type;
+      document.getElementById("placeName").textContent = currentPlan.name;
+      document.getElementById("placeMeta").textContent = `預估花費 NT$ ${currentPlan.cost}　·　符合預算 NT$ ${limit}`;
+      document.getElementById("food").textContent = currentPlan.food;
+      document.getElementById("wear").textContent = currentPlan.wear;
+      document.getElementById("reason").textContent = currentPlan.detail;
+      document.getElementById("matchText").textContent = `符合天氣、心情與預算條件的隨機提案`;
+      document.getElementById("save").classList.remove("saved");
+      document.getElementById("save").textContent = "♡ 收藏這個行程";
+    }
+
+    document.getElementById("draw").addEventListener("click", drawPlan);
+
+    document.getElementById("save").addEventListener("click", () => {
+      let saved = JSON.parse(localStorage.getItem("savedPlans") || "[]");
+      if (!saved.includes(currentPlan.name)) saved.push(currentPlan.name);
+      localStorage.setItem("savedPlans", JSON.stringify(saved));
+      document.getElementById("save").classList.add("saved");
+      document.getElementById("save").textContent = "✓ 已收藏";
+      showSaved();
+    });
+
+    function showSaved() {
+      const saved = JSON.parse(localStorage.getItem("savedPlans") || "[]");
+      document.getElementById("savedList").textContent =
+        saved.length ? saved.join("　／　") : "還沒有收藏，遇到喜歡的行程就收下吧。";
+    }
+
+    drawPlan();
+    showSaved();
+  </script>
 </body>
 </html>
